@@ -91,6 +91,7 @@ mongod
 cd backend
 npm run dev
 # Server runs on http://localhost:5000
+# Swagger API Documentation available at http://localhost:5000/api/v1/docs
 ```
 
 ### Start Frontend
@@ -179,7 +180,10 @@ backend-assess/
 - `PUT /api/v1/tasks/:id` - Update task (Protected)
 - `DELETE /api/v1/tasks/:id` - Delete task (Admin only)
 
-See [API_DOCUMENTATION.md](API_DOCUMENTATION.md) for detailed API documentation.
+### Documentation
+- `GET /api/v1/docs` - Swagger API Documentation (Interactive)
+
+See [API_DOCUMENTATION.md](API_DOCUMENTATION.md) for detailed API documentation, or visit the Swagger UI at `http://localhost:5000/api/v1/docs` when the server is running.
 
 ## 🧪 Testing
 
