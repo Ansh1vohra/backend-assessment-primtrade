@@ -1,0 +1,182 @@
+1. Purpose
+
+The purpose of this system is to build a secure and scalable backend application that provides user authentication, role-based access control, and CRUD operations on a secondary entity.
+A basic frontend UI will be developed to interact with and test the backend APIs.
+
+2. Scope
+
+The system will include:
+
+Backend APIs built using Node.js and Express.js
+
+Database management using MongoDB with Mongoose
+
+JWT-based authentication
+
+Role-based authorization (User & Admin)
+
+CRUD operations for a secondary entity (Tasks)
+
+A simple React.js frontend for API interaction
+
+3. User Roles
+3.1 Admin
+
+Can log in
+
+Can access all APIs
+
+Can create, read, update, and delete tasks
+
+Can delete any user-created task
+
+3.2 User
+
+Can register and log in
+
+Can access protected APIs
+
+Can create, read, and update their own tasks
+
+Cannot delete tasks created by other users
+
+4. Functional Requirements
+4.1 Authentication & Authorization
+
+Users must be able to register using email and password
+
+Users must be able to log in using registered credentials
+
+Passwords must be stored in hashed format
+
+On successful login, a JWT token must be issued
+
+Protected routes must require a valid JWT
+
+Role-based access must restrict actions based on user role
+
+4.2 User Management
+
+System shall store user details:
+
+Name
+
+Email (unique)
+
+Password (hashed)
+
+Role (user/admin)
+
+Duplicate email registration must be prevented
+
+4.3 Task Management (CRUD Operations)
+
+Authenticated users can:
+
+Create a task
+
+View their tasks
+
+Update their tasks
+
+Admin users can:
+
+View all tasks
+
+Update any task
+
+Delete any task
+
+Each task shall include:
+
+Title
+
+Description
+
+Status (pending/completed)
+
+Created By (user reference)
+
+Created At timestamp
+
+4.4 API Versioning
+
+All APIs must follow versioning:
+
+/api/v1/...
+
+4.5 Error Handling & Validation
+
+Input validation must be performed on all API requests
+
+System must return proper HTTP status codes:
+
+200 – Success
+
+201 – Resource Created
+
+400 – Bad Request
+
+401 – Unauthorized
+
+403 – Forbidden
+
+404 – Not Found
+
+500 – Internal Server Error
+
+Error messages must be meaningful and consistent
+
+4.6 API Documentation
+
+APIs must be documented using Swagger or Postman
+
+Documentation should include:
+
+Endpoint details
+
+Request/response examples
+
+Authentication requirements
+
+5. Frontend Functional Requirements
+
+Users must be able to:
+
+Register
+
+Log in
+
+Access a protected dashboard
+
+Perform CRUD operations on tasks
+
+JWT token must be attached to API requests
+
+UI must display success and error messages from APIs
+
+6. Security Requirements
+
+Passwords must never be stored in plain text
+
+JWT tokens must be securely signed and validated
+
+Protected routes must not be accessible without authentication
+
+Input sanitization must prevent malicious inputs
+
+7. Scalability & Maintainability
+
+Modular backend structure must allow easy addition of new modules
+
+Stateless authentication using JWT
+
+API versioning for future enhancements
+
+Optional support for:
+
+Caching (Redis)
+
+Logging
+
+Docker-based deployment
