@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const { generateToken } = require('../utils/jwt');
+const { generateAccessToken, generateRefreshToken, verifyRefreshToken } = require('../utils/jwt');
 const ErrorResponse = require('../utils/errorResponse');
 
 // @desc    Register user
@@ -26,8 +26,13 @@ exports.register = async (req, res, next) => {
       role: role || 'user'
     });
 
-    // Generate token
-    const token = generateToken(user._id);
+    // Generate tokens
+    const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+
+    // Save refresh token to database
+    user.refreshToken = refreshToken;
+    await user.save();
 
     res.status(201).json({
       success: true,
@@ -37,7 +42,8 @@ exports.register = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        token
+        accessToken,
+        refreshToken
       }
     });
   } catch (error) {
@@ -80,8 +86,13 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    // Generate token
-    const token = generateToken(user._id);
+    // Generate tokens
+    const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+
+    // Save refresh token to database
+    user.refreshToken = refreshToken;
+    await user.save();
 
     res.status(200).json({
       success: true,
@@ -91,8 +102,77 @@ exports.login = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        token
+        accessToken,
+        refreshToken
       }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Refresh access token
+// @route   POST /api/v1/auth/refresh
+// @access  Public
+exports.refreshToken = async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: 'Refresh token is required'
+      });
+    }
+
+    // Verify refresh token
+    const decoded = verifyRefreshToken(refreshToken);
+
+    // Find user and check if refresh token matches
+    const user = await User.findById(decoded.id).select('+refreshToken');
+
+    if (!user || user.refreshToken !== refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid refresh token'
+      });
+    }
+
+    // Generate new tokens
+    const newAccessToken = generateAccessToken(user._id);
+    const newRefreshToken = generateRefreshToken(user._id);
+
+    // Update refresh token in database
+    user.refreshToken = newRefreshToken;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Token refreshed successfully',
+      data: {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken
+      }
+    });
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid or expired refresh token'
+    });
+  }
+};
+
+// @desc    Logout user
+// @route   POST /api/v1/auth/logout
+// @access  Private
+exports.logout = async (req, res, next) => {
+  try {
+    // Remove refresh token from database
+    await User.findByIdAndUpdate(req.user.id, { refreshToken: null });
+
+    res.status(200).json({
+      success: true,
+      message: 'Logged out successfully'
     });
   } catch (error) {
     next(error);

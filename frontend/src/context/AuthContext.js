@@ -9,10 +9,10 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Check if user is logged in
-    const token = localStorage.getItem('token');
+    const accessToken = localStorage.getItem('accessToken');
     const userData = localStorage.getItem('user');
     
-    if (token && userData) {
+    if (accessToken && userData) {
       setUser(JSON.parse(userData));
     }
     setLoading(false);
@@ -21,9 +21,10 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await authAPI.register(userData);
-      const { token, ...user } = response.data.data;
+      const { accessToken, refreshToken, ...user } = response.data.data;
       
-      localStorage.setItem('token', token);
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
       setUser(user);
       
@@ -39,9 +40,10 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       const response = await authAPI.login(credentials);
-      const { token, ...user } = response.data.data;
+      const { accessToken, refreshToken, ...user } = response.data.data;
       
-      localStorage.setItem('token', token);
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
       setUser(user);
       
@@ -54,10 +56,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
+  const logout = async () => {
+    try {
+      await authAPI.logout();
+    } catch (error) {
+      // Continue with logout even if API call fails
+      console.error('Logout error:', error);
+    } finally {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      setUser(null);
+    }
   };
 
   const value = {
