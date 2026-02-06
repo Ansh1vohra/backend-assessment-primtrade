@@ -1,5 +1,20 @@
 const swaggerJsdoc = require('swagger-jsdoc');
 
+const getServerUrl = () => {
+  if (process.env.NODE_ENV === 'production') {
+    // For Vercel deployment, use relative path
+    return {
+      url: '/api/v1',
+      description: 'Production server'
+    };
+  }
+  // For local development
+  return {
+    url: `http://localhost:${process.env.PORT || 5000}/api/v1`,
+    description: 'Development server'
+  };
+};
+
 const options = {
   definition: {
     openapi: '3.0.0',
@@ -12,12 +27,7 @@ const options = {
         email: 'support@example.com'
       }
     },
-    servers: [
-      {
-        url: 'http://localhost:5000/api/v1',
-        description: 'Development server'
-      }
-    ],
+    servers: [getServerUrl()],
     components: {
       securitySchemes: {
         bearerAuth: {

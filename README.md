@@ -101,7 +101,37 @@ npm start
 # App runs on http://localhost:3000
 ```
 
-## 📁 Project Structure
+## � Authentication Flow
+
+### 1. User Registration/Login
+- User registers or logs in
+- Backend returns both **accessToken** (15 min expiry) and **refreshToken** (7 days expiry)
+- Frontend stores tokens in localStorage
+
+### 2. API Requests
+- Frontend sends accessToken in Authorization header for all protected requests
+- Backend validates token on every request
+
+### 3. Token Refresh
+- When accessToken expires (401 error), frontend automatically:
+  - Sends refreshToken to `/auth/refresh` endpoint
+  - Gets new accessToken and refreshToken pair
+  - Retries the original request with new token
+  - Updates stored tokens
+
+### 4. Logout
+- Frontend calls `/auth/logout` endpoint
+- Backend invalidates refreshToken in database
+- Frontend clears all tokens from localStorage
+- User is redirected to login page
+
+**Benefits:**
+- ✅ Short-lived access tokens reduce security risks
+- ✅ Automatic token rotation enhances security
+- ✅ Seamless user experience with automatic refresh
+- ✅ Ability to revoke tokens (logout)
+
+## �📁 Project Structure
 
 ```
 backend-assess/
@@ -169,8 +199,10 @@ backend-assess/
 ## 📡 API Endpoints
 
 ### Authentication
-- `POST /api/v1/auth/register` - Register new user
-- `POST /api/v1/auth/login` - Login user
+- `POST /api/v1/auth/register` - Register new user (returns accessToken & refreshToken)
+- `POST /api/v1/auth/login` - Login user (returns accessToken & refreshToken)
+- `POST /api/v1/auth/refresh` - Refresh access token using refresh token
+- `POST /api/v1/auth/logout` - Logout and invalidate refresh token (Protected)
 - `GET /api/v1/auth/me` - Get current user (Protected)
 
 ### Tasks
@@ -209,15 +241,20 @@ curl -X POST http://localhost:5000/api/v1/auth/register \
 5. View all tasks
 6. (Admin) Delete tasks
 
-## 🛡️ Security Features
+## � Security Features
 
 - **Password Security**: Bcrypt hashing with salt rounds
-- **JWT Authentication**: Secure token-based authentication
+- **JWT Authentication**: Secure token-based authentication with:
+  - Short-lived access tokens (15 minutes)
+  - Long-lived refresh tokens (7 days)
+  - Automatic token rotation on refresh
+  - Token revocation on logout
 - **Input Validation**: Express-validator for request validation
 - **Rate Limiting**: 100 requests per 15 minutes per IP
 - **Security Headers**: Helmet.js for HTTP security
 - **CORS**: Enabled for cross-origin requests
 - **Error Handling**: Centralized error handling
+- **Token Storage**: Tokens stored securely (accessToken in memory, refreshToken in localStorage)
 
 ## 📊 Database Schema
 

@@ -36,7 +36,15 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Swagger Documentation
+app.get('/api/v1/docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  swaggerOptions: {
+    url: '/api/v1/docs.json'
+  },
   customCss: '.swagger-ui .topbar { display: none }',
   customSiteTitle: 'Task Management API Documentation'
 }));

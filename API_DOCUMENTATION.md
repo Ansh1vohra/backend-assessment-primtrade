@@ -40,7 +40,8 @@ Register a new user account.
     "name": "John Doe",
     "email": "john@example.com",
     "role": "user",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
   }
 }
 ```
@@ -78,7 +79,8 @@ Login with existing credentials.
     "name": "John Doe",
     "email": "john@example.com",
     "role": "user",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
   }
 }
 ```
@@ -93,14 +95,76 @@ Login with existing credentials.
 
 ---
 
-### 3. Get Current User
+### 3. Refresh Access Token
+**POST** `/auth/refresh`
+
+Get a new access token using the refresh token. The refresh token will also be rotated.
+
+**Request Body:**
+```json
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Token refreshed successfully",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
+
+**Error Response (401):**
+```json
+{
+  "success": false,
+  "message": "Invalid or expired refresh token"
+}
+```
+
+---
+
+### 4. Logout User
+**POST** `/auth/logout`
+
+Logout and invalidate refresh token.
+
+**Headers:**
+```
+Authorization: Bearer <accessToken>
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Logged out successfully"
+}
+```
+
+**Error Response (401):**
+```json
+{
+  "success": false,
+  "message": "Not authorized to access this route"
+}
+```
+
+---
+
+### 5. Get Current User
 **GET** `/auth/me`
 
 Get the currently logged-in user's information.
 
 **Headers:**
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <accessToken>
 ```
 
 **Success Response (200):**
@@ -427,30 +491,43 @@ curl -X POST http://localhost:5000/api/v1/auth/login \
   -d '{"email":"john@example.com","password":"password123"}'
 ```
 
+### Refresh Token
+```bash
+curl -X POST http://localhost:5000/api/v1/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{"refreshToken":"YOUR_REFRESH_TOKEN"}'
+```
+
+### Logout
+```bash
+curl -X POST http://localhost:5000/api/v1/auth/logout \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
 ### Create Task
 ```bash
 curl -X POST http://localhost:5000/api/v1/tasks \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
   -d '{"title":"My Task","description":"Task description","status":"pending"}'
 ```
 
 ### Get All Tasks
 ```bash
 curl -X GET http://localhost:5000/api/v1/tasks \
-  -H "Authorization: Bearer YOUR_TOKEN"
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
 ### Update Task
 ```bash
 curl -X PUT http://localhost:5000/api/v1/tasks/TASK_ID \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
   -d '{"status":"completed"}'
 ```
 
 ### Delete Task (Admin only)
 ```bash
 curl -X DELETE http://localhost:5000/api/v1/tasks/TASK_ID \
-  -H "Authorization: Bearer YOUR_TOKEN"
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
